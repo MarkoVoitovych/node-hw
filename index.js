@@ -1,5 +1,13 @@
-const { Command } = require('commander');
-const program = new Command();
+const { program } = require('commander');
+
+const { listContacts } = require('./listContacts');
+const {
+  getContactById,
+  editContact,
+  removeContact,
+  addContact,
+} = require('./contacts');
+
 program
   .option('-a, --action <type>', 'choose action')
   .option('-i, --id <type>', 'user id')
@@ -10,14 +18,6 @@ program
 program.parse(process.argv);
 
 const argv = program.opts();
-
-const {
-  listContacts,
-  getContactById,
-  editContact,
-  removeContact,
-  addContact,
-} = require('./contacts');
 
 const invokeAction = async ({ action, id, name, email, phone }) => {
   switch (action) {
