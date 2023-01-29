@@ -12,7 +12,11 @@ async function getContactById(contactId) {
   return result;
 }
 
-async function addContact({ name, email, phone }) {
+async function addContact({
+  name = 'name is missing',
+  email = 'email is missing',
+  phone = 'phone is missing',
+}) {
   const contacts = await listContacts();
   const newContact = { name, email, phone, id: v4() };
   contacts.push(newContact);
@@ -20,13 +24,14 @@ async function addContact({ name, email, phone }) {
   return newContact;
 }
 
-async function editContact({ id, name, email, phone }) {
+async function editContact(contactData) {
   const contacts = await listContacts();
-  const idx = contacts.findIndex(contact => contact.id === id);
+  const idx = contacts.findIndex(contact => contact.id === contactData.id);
   if (idx === -1) {
     return null;
   }
-  contacts[idx] = { name, email, phone, id };
+  contacts[idx] = { ...contacts[idx], ...contactData };
+  delete contacts[idx].action;
   await writeContacts(contacts);
   return contacts[idx];
 }
