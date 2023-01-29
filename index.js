@@ -15,7 +15,7 @@ program
   .option('-e, --email <type>', 'user email')
   .option('-p, --phone <type>', 'user phone');
 
-program.parse(process.argv);
+program.parse();
 
 const argv = program.opts();
 
@@ -39,9 +39,7 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
     case 'edit':
       const editedContact = await editContact({
         id: String(id),
-        name,
-        email,
-        phone,
+        ...argv,
       });
       console.log(editedContact);
       break;
