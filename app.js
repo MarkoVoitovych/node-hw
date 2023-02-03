@@ -1,26 +1,23 @@
-const express = require('express');
-const logger = require('morgan');
-const cors = require('cors');
+const express = require("express");
+const logger = require("morgan");
 
-const contactRouter = require('./routes/api/contacts');
-const { stat } = require('fs');
+const contactRouter = require("./routes/api/contacts");
 
 const app = express();
 
-const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(logger(formatsLogger));
-app.use(cors());
 app.use(express.json());
 
-app.use('/api/contacts', contactRouter);
+app.use("/api/contacts", contactRouter);
 
 app.use((_, res) => {
-  res.status(404).json({ message: 'Not found' });
+  res.status(404).json({ message: "Not found" });
 });
 
 app.use((err, _, res, __) => {
-  const { status = 500, message = 'Server error' } = err;
+  const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
 });
 
