@@ -1,0 +1,23 @@
+{
+  "liveSassCompile.settings.formats": [
+    {
+      "format": "expanded",
+      "extensionName": ".css",
+      "savePath": "/css"
+    },
+    {
+      "format": "compressed",
+      "extensionName": ".min.css",
+      "savePath": "/css"
+    }
+  ],
+  "liveSassCompile.settings.excludeList": ["**/node_modules/**", ".vscode/**"],
+  "liveSassCompile.settings.generateMap": true,
+  "liveServer.settings.port": 1235,
+  "liveSassCompile.settings.autoprefix": null,
+
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": true },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "emmet.triggerExpansionOnTab": true
+}
