@@ -1,8 +1,8 @@
-const contactsOperations = require('../models/contacts');
+const { Contact } = require('../models/contact');
 const { ctrlWrapper, HttpError } = require('../helpers');
 
 const getAll = async (_, res) => {
-  const result = await contactsOperations.listContacts();
+  const result = await Contact.find();
   res.json({
     status: 'success',
     code: 200,
@@ -12,7 +12,7 @@ const getAll = async (_, res) => {
 
 const getById = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contactsOperations.getContactById(contactId);
+  const result = await Contact.findById(contactId);
   if (!result) {
     throw HttpError(404, `Contact with id ${contactId} not found`);
   }
@@ -24,8 +24,7 @@ const getById = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  const { name, email, phone } = req.body;
-  const result = await contactsOperations.addContact({ name, email, phone });
+  const result = await Contact.create({ favourite: false, ...req.body });
   res.status(201).json({
     status: 'success',
     code: 201,
@@ -34,12 +33,24 @@ const add = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { name, email, phone } = req.body;
   const contactId = req.params.contactId;
-  const result = await contactsOperations.updateContact(contactId, {
-    name,
-    email,
-    phone,
+  const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
+    new: true,
+  });
+  if (!result) {
+    throw HttpError(404, `Contact with id ${contactId} not found`);
+  }
+  res.status(200).json({
+    status: 'success',
+    code: 200,
+    data: result,
+  });
+};
+
+const updateStatus = async (req, res) => {
+  const contactId = req.params.contactId;
+  const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
+    new: true,
   });
   if (!result) {
     throw HttpError(404, `Contact with id ${contactId} not found`);
@@ -53,7 +64,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
   const contactId = req.params.contactId;
-  const result = await contactsOperations.removeContact(contactId);
+  const result = await Contact.findByIdAndRemove({ _id: contactId });
   if (!result) {
     throw HttpError(404, `Contact with id ${contactId} not found`);
   }
@@ -69,5 +80,6 @@ module.exports = {
   getById: ctrlWrapper(getById),
   add: ctrlWrapper(add),
   update: ctrlWrapper(update),
+  updateStatus: ctrlWrapper(updateStatus),
   remove: ctrlWrapper(remove),
 };
