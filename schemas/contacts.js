@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const contactSchema = Joi.object({
+const addSchema = Joi.object({
   name: Joi.string()
     .pattern(/^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/)
     .required(),
@@ -16,4 +16,4 @@ const contactSchema = Joi.object({
     .required(),
 });
 
-module.exports = contactSchema;
+module.exports = { addSchema };

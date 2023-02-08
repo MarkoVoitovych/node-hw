@@ -1,10 +1,10 @@
-const generateErrorMessage = require('../helpers/generateErrorMessage');
+const validateError = require('../helpers/validateError');
 
-const validation = schema => {
+const validateBody = schema => {
   return (req, _, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
-      const errorMessage = generateErrorMessage(error.message);
+      const errorMessage = validateError(error.message);
       error.message = errorMessage;
       error.status = 400;
       next(error);
@@ -13,4 +13,4 @@ const validation = schema => {
   };
 };
 
-module.exports = validation;
+module.exports = validateBody;

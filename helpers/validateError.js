@@ -1,4 +1,4 @@
-const generateErrorMessage = message => {
+const validateError = message => {
   if (message.includes('name')) {
     return 'Name may contain only letters, apostrophe, dash and spaces.';
   } else if (message.includes('phone')) {
@@ -8,4 +8,4 @@ const generateErrorMessage = message => {
   }
 };
 
-module.exports = generateErrorMessage;
+module.exports = validateError;
