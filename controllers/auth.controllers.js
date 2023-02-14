@@ -39,6 +39,7 @@ const login = async (req, res) => {
 
   const accessToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '30m' });
   const refreshToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '23h' });
+  await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
 
   res.json({
     status: 'success',
@@ -55,31 +56,14 @@ const login = async (req, res) => {
   });
 };
 
-// const getAll = async (_, res) => {
-//   const result = await Contact.find();
-//   res.json({
-//     status: 'success',
-//     code: 200,
-//     data: result,
-//   });
-// };
-
-// const updateStatus = async (req, res) => {
-//   const contactId = req.params.contactId;
-//   const result = await Contact.findByIdAndUpdate({ _id: contactId }, req.body, {
-//     new: true,
-//   });
-//   if (!result) {
-//     throw HttpError(404, `Contact with id ${contactId} not found`);
-//   }
-//   res.status(200).json({
-//     status: 'success',
-//     code: 200,
-//     data: result,
-//   });
-// };
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { accessToken: null, refreshToken: null });
+  res.status(204).json();
+};
 
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
+  logout: ctrlWrapper(logout),
 };

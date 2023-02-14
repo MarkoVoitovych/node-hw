@@ -24,7 +24,7 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      match: nameRegexp,
+      // match: nameRegexp,
       required: [
         true,
         'Set name for user. Name may contain only letters, apostrophe, dash and spaces.',
@@ -32,7 +32,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      match: passwordRegexp,
+      // match: passwordRegexp,
       required: [
         true,
         'Set password for user. Minimum eight characters, at least one uppercase letter, one lowercase letter and one number.',
@@ -40,7 +40,7 @@ const userSchema = new Schema(
     },
     email: {
       type: String,
-      match: emailRegexp,
+      // match: emailRegexp,
       required: [
         true,
         'Email is required. Email may contain letters, numbers and some punctuation marks(dashes, dots, underscores).',
