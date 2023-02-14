@@ -1,11 +1,11 @@
 const HttpError = require('./generateHttpError');
 const ctrlWrapper = require('./ctrlWrapper');
-const handleValidationIdErrors = require('./handleValidationIdErrors');
+const mongooseHandleError = require('./mongooseHandleError');
 const customValidateBodyError = require('./customValidateBodyError');
 
 module.exports = {
   HttpError,
   ctrlWrapper,
-  handleValidationIdErrors,
+  mongooseHandleError,
   customValidateBodyError,
 };

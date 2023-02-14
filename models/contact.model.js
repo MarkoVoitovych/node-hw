@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 const Joi = require('joi');
 
-const { handleValidationIdErrors } = require('../helpers');
+const { mongooseHandleError } = require('../helpers');
 
 const nameRegexp = /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
 const emailRegexp =
@@ -24,28 +24,42 @@ const contactSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, 'Set name for contact'],
+      required: [
+        true,
+        'Set name for contact. Name may contain only letters, apostrophe, dash and spaces.',
+      ],
     },
     email: {
       type: String,
+      required: [
+        true,
+        'Set email for contact. Email may contain letters, numbers and some punctuation marks(dashes, dots, underscores).',
+      ],
     },
     phone: {
       type: String,
+      required: [
+        true,
+        'Set phone for contact. Phone number must be digits and can contain spaces, dashes, parentheses and can start with +.',
+      ],
     },
     favourite: {
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    },
   },
-  { versionKey: false },
+  { versionKey: false, timestamps: true },
 );
 
-contactSchema.post('save', handleValidationIdErrors);
+contactSchema.post('save', mongooseHandleError);
 
 const schemas = {
   addSchema,
   updateStatusSchema,
-  contactSchema,
 };
 
 const Contact = model('contact', contactSchema);
