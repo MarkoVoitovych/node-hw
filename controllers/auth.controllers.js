@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { TOKEN_KEY } = process.env;
 const { User } = require('../models');
 const { ctrlWrapper, HttpError } = require('../helpers');
+
+const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, HASH_POWER } = process.env;
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -12,7 +13,7 @@ const register = async (req, res) => {
     throw HttpError(409, `Email in use.`);
   }
 
-  const hashPassword = await bcrypt.hash(password, 10);
+  const hashPassword = await bcrypt.hash(password, HASH_POWER);
 
   const newUser = await User.create({
     name,
@@ -36,20 +37,24 @@ const login = async (req, res) => {
   const user = await User.findOne({ email: email.toLowerCase() });
 
   if (!user) {
-    throw HttpError(401, 'Email or password is wrong.');
+    throw HttpError(403, 'Email or password is wrong.');
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
-    throw HttpError(401, 'Email or password is wrong.');
+    throw HttpError(403, 'Email or password is wrong.');
   }
 
   const payload = {
     id: user._id,
   };
 
-  const accessToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '30m' });
-  const refreshToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '23h' });
+  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
+    expiresIn: '30m',
+  });
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
+    expiresIn: '23h',
+  });
   await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
 
   res.json({
@@ -78,11 +83,16 @@ const refresh = async (req, res) => {
   const [bearer, token] = authorization.split(' ');
 
   if (bearer !== 'Bearer') {
-    throw HttpError(401, 'Not authorized');
+    throw HttpError(400);
   }
-  const { id } = jwt.verify(token, TOKEN_KEY);
+  const { id } = jwt.verify(token, JWT_REFRESH_SECRET);
   const user = await User.findById(id);
-  if (!user || !user.refreshToken || user.refreshToken !== token) {
+
+  if (!user) {
+    throw HttpError(403, "User doesn't exist");
+  }
+
+  if (!user.refreshToken || user.refreshToken !== token) {
     throw HttpError(401, 'Not authorized');
   }
 
@@ -90,8 +100,12 @@ const refresh = async (req, res) => {
     id: user._id,
   };
 
-  const accessToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '30m' });
-  const refreshToken = jwt.sign(payload, TOKEN_KEY, { expiresIn: '23h' });
+  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
+    expiresIn: '30m',
+  });
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
+    expiresIn: '23h',
+  });
   await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
 
   res.json({
