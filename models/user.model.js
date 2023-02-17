@@ -1,55 +1,74 @@
 const { Schema, model } = require('mongoose');
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
 
 const { mongooseHandleError } = require('../helpers');
+const { generateCustomErrMsg } = require('../helpers');
 
 const nameRegexp = /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
 const emailRegexp =
   /^([a-zA-Z0-9_\-.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
-const passwordRegexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,18}$/;
+const passwordRegexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,18}$/;
+
+const subscriptionsList = ['starter', 'pro', 'business'];
 
 const registerSchema = Joi.object({
-  name: Joi.string().pattern(nameRegexp).required(),
-  email: Joi.string().pattern(emailRegexp).required(),
-  password: Joi.string().pattern(passwordRegexp).required(),
+  name: Joi.string()
+    .pattern(nameRegexp)
+    .messages(generateCustomErrMsg('Name'))
+    .required(),
+  email: Joi.string()
+    .pattern(emailRegexp)
+    .messages(generateCustomErrMsg('Email'))
+    .required(),
+  password: Joi.string()
+    .pattern(passwordRegexp)
+    .messages(generateCustomErrMsg('Password'))
+    .required(),
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().pattern(emailRegexp).required(),
-  password: Joi.string().pattern(passwordRegexp).required(),
+  email: Joi.string()
+    .pattern(emailRegexp)
+    .messages(generateCustomErrMsg('Email'))
+    .required(),
+  password: Joi.string()
+    .pattern(passwordRegexp)
+    .messages(generateCustomErrMsg('Password'))
+    .required(),
 });
+
+const updateSubscriptionSchema = Joi.object({
+  subscription: Joi.string()
+    .valid(...subscriptionsList)
+    .messages(generateCustomErrMsg('Subscription')),
+}).min(1);
 
 const userSchema = new Schema(
   {
     name: {
       type: String,
-      // match: nameRegexp,
-      required: [
-        true,
-        'Set name for user. Name may contain only letters, apostrophe, dash and spaces.',
+      match: [
+        nameRegexp,
+        'may contain only letters, apostrophe, dash and spaces.',
       ],
+      required: [true, 'is a required field.'],
     },
     password: {
       type: String,
-      // match: passwordRegexp,
-      required: [
-        true,
-        'Set password for user. Minimum eight characters, at least one uppercase letter, one lowercase letter and one number.',
-      ],
+      required: [true, 'is a required field.'],
     },
     email: {
       type: String,
-      // match: emailRegexp,
-      required: [
-        true,
-        'Email is required. Email may contain letters, numbers and some punctuation marks(dashes, dots, underscores).',
+      match: [
+        emailRegexp,
+        'may contain letters, numbers and some punctuation marks(dashes, dots, underscores).',
       ],
+      required: [true, 'is a required field.'],
       unique: true,
     },
     subscription: {
       type: String,
-      enum: ['starter', 'pro', 'business'],
+      enum: subscriptionsList,
       default: 'starter',
     },
     accessToken: { type: String, default: null },
@@ -58,19 +77,12 @@ const userSchema = new Schema(
   { versionKey: false, timestamps: true },
 );
 
-userSchema.methods.setPassword = function (password) {
-  this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-};
-
-userSchema.methods.comparePassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
-};
-
 userSchema.post('save', mongooseHandleError);
 
 const schemas = {
   registerSchema,
   loginSchema,
+  updateSubscriptionSchema,
 };
 
 const User = model('user', userSchema);

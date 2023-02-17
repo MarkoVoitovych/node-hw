@@ -2,6 +2,7 @@ const { Schema, model } = require('mongoose');
 const Joi = require('joi');
 
 const { mongooseHandleError } = require('../helpers');
+const { generateCustomErrMsg } = require('../helpers');
 
 const nameRegexp = /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
 const emailRegexp =
@@ -10,47 +11,32 @@ const phoneRegexp =
   /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/;
 
 const addSchema = Joi.object({
-  name: Joi.string().pattern(nameRegexp).required(),
-  email: Joi.string().pattern(emailRegexp).required(),
-  phone: Joi.string().pattern(phoneRegexp).required(),
+  name: Joi.string()
+    .pattern(nameRegexp)
+    .messages(generateCustomErrMsg('Name'))
+    .required(),
+  email: Joi.string()
+    .pattern(emailRegexp)
+    .messages(generateCustomErrMsg('Email'))
+    .required(),
+  phone: Joi.string()
+    .pattern(phoneRegexp)
+    .messages(generateCustomErrMsg('Phone'))
+    .required(),
   favourite: Joi.boolean(),
 });
 
 const updateStatusSchema = Joi.object({
-  favourite: Joi.bool().required(),
-});
+  favourite: Joi.bool().messages(generateCustomErrMsg('Favourite')),
+}).min(1);
 
 const contactSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: [
-        true,
-        'Set name for contact. Name may contain only letters, apostrophe, dash and spaces.',
-      ],
-    },
-    email: {
-      type: String,
-      required: [
-        true,
-        'Set email for contact. Email may contain letters, numbers and some punctuation marks(dashes, dots, underscores).',
-      ],
-    },
-    phone: {
-      type: String,
-      required: [
-        true,
-        'Set phone for contact. Phone number must be digits and can contain spaces, dashes, parentheses and can start with +.',
-      ],
-    },
-    favourite: {
-      type: Boolean,
-      default: false,
-    },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'user',
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    favourite: { type: Boolean, default: false },
+    owner: { type: Schema.Types.ObjectId, ref: 'user' },
   },
   { versionKey: false, timestamps: true },
 );
