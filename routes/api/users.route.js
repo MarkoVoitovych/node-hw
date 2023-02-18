@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { schemas } = require('../../models/user.model');
+const { userSchemas } = require('../../shemas');
 const { usersControllers: ctrl } = require('../../controllers');
 const { authentication, validateBody } = require('../../middlewares');
 
@@ -11,7 +11,7 @@ router.get('/current', authentication, ctrl.getCurrent);
 router.patch(
   '/subscription',
   authentication,
-  validateBody(schemas.updateSubscriptionSchema),
+  validateBody(userSchemas.updateSubscriptionSchema),
   ctrl.updateSubscription,
 );
 

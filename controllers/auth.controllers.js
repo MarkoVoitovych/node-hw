@@ -39,7 +39,6 @@ const login = async (req, res) => {
   if (!user) {
     throw HttpError(403, 'Email or password is wrong.');
   }
-
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
     throw HttpError(403, 'Email or password is wrong.');
@@ -48,13 +47,13 @@ const login = async (req, res) => {
   const payload = {
     id: user._id,
   };
-
   const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
     expiresIn: '30m',
   });
   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: '23h',
   });
+
   await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
 
   res.json({
@@ -79,34 +78,18 @@ const logout = async (req, res) => {
 };
 
 const refresh = async (req, res) => {
-  const { authorization = '' } = req.headers;
-  const [bearer, token] = authorization.split(' ');
-
-  if (bearer !== 'Bearer') {
-    throw HttpError(400);
-  }
-  const { id } = jwt.verify(token, JWT_REFRESH_SECRET);
-  const user = await User.findById(id);
-
-  if (!user) {
-    throw HttpError(403, "User doesn't exist");
-  }
-
-  if (!user.refreshToken || user.refreshToken !== token) {
-    throw HttpError(401, 'Not authorized');
-  }
-
+  const { _id } = req.user;
   const payload = {
-    id: user._id,
+    id: _id,
   };
-
   const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
     expiresIn: '30m',
   });
   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: '23h',
   });
-  await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
+
+  await User.findByIdAndUpdate(_id, { accessToken, refreshToken });
 
   res.json({
     status: 'success',
@@ -114,7 +97,7 @@ const refresh = async (req, res) => {
     data: {
       accessToken,
       refreshToken,
-      id: user._id,
+      id: _id,
     },
   });
 };

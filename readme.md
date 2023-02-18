@@ -49,5 +49,5 @@ npm run start:dev
 npm run lint
 
 # запуск виконання перевірки коду з eslint з автоматичними виправленнями простих помилок
-npm run lint
+npm run lint:fix
 ```
