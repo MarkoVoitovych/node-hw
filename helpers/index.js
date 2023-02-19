@@ -1,11 +1,15 @@
 const HttpError = require('./generateHttpError');
 const ctrlWrapper = require('./ctrlWrapper');
-const handleValidationIdErrors = require('./handleValidationIdErrors');
-const customValidateBodyError = require('./customValidateBodyError');
+const mongooseHandleError = require('./mongooseHandleError');
+const generateCustomErrMsg = require('./generateCustomErrMsg');
+const regExps = require('./regExps');
+const subscriptionsList = require('./subscriptionsList');
 
 module.exports = {
   HttpError,
   ctrlWrapper,
-  handleValidationIdErrors,
-  customValidateBodyError,
+  mongooseHandleError,
+  generateCustomErrMsg,
+  regExps,
+  subscriptionsList,
 };
