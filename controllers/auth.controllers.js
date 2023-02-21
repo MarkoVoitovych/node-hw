@@ -13,7 +13,7 @@ const register = async (req, res) => {
     throw HttpError(409, `Email in use.`);
   }
 
-  const hashPassword = await bcrypt.hash(password, HASH_POWER);
+  const hashPassword = await bcrypt.hash(password, Number(HASH_POWER));
 
   const newUser = await User.create({
     name,
