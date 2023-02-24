@@ -20,13 +20,13 @@ const refreshToken = async (req, res, next) => {
       return;
     }
     if (!user.refreshToken || user.refreshToken !== token) {
-      next(HttpError(401, 'Not authorized'));
+      next(HttpError(403));
       return;
     }
     req.user = user;
     next();
   } catch (error) {
-    next(HttpError(401, 'Not authorized'));
+    next(HttpError(403));
   }
 };
 

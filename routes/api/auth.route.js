@@ -1,12 +1,12 @@
 const express = require('express');
 
 const { authControllers: ctrl } = require('../../controllers');
+const { userSchemas } = require('../../shemas');
 const {
   validateBody,
   authentication,
   refreshToken,
 } = require('../../middlewares');
-const { userSchemas } = require('../../shemas');
 
 const router = express.Router();
 
@@ -18,8 +18,8 @@ router.post(
 
 router.post('/login', validateBody(userSchemas.loginSchema), ctrl.login);
 
-router.post('/logout', authentication, ctrl.logout);
-
 router.post('/refresh', refreshToken, ctrl.refresh);
+
+router.post('/logout', authentication, ctrl.logout);
 
 module.exports = router;

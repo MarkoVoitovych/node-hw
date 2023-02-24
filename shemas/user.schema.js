@@ -19,6 +19,8 @@ const registerSchema = Joi.object({
     .pattern(regExps.passwordRegexp)
     .messages(generateCustomErrMsg('Password'))
     .required(),
+  repeatPassword: Joi.ref('password'),
+  avatarURL: Joi.string(),
 });
 
 const loginSchema = Joi.object({

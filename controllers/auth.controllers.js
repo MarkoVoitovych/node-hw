@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const gravatar = require('gravatar');
 
 const { User } = require('../models');
 const { ctrlWrapper, HttpError } = require('../helpers');
@@ -14,11 +15,13 @@ const register = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, Number(HASH_POWER));
+  const avatarURL = gravatar.url(email);
 
   const newUser = await User.create({
     name,
     email: email.toLowerCase(),
     password: hashPassword,
+    avatarURL,
   });
 
   res.status(201).json({
@@ -71,12 +74,6 @@ const login = async (req, res) => {
   });
 };
 
-const logout = async (req, res) => {
-  const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { accessToken: null, refreshToken: null });
-  res.status(204).json();
-};
-
 const refresh = async (req, res) => {
   const { _id } = req.user;
   const payload = {
@@ -100,6 +97,12 @@ const refresh = async (req, res) => {
       id: _id,
     },
   });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { accessToken: null, refreshToken: null });
+  res.status(204).json();
 };
 
 module.exports = {

@@ -34,6 +34,7 @@ const userSchema = new Schema(
       enum: subscriptionsList,
       default: 'starter',
     },
+    avatarURL: { type: String, required: true },
     accessToken: { type: String, default: null },
     refreshToken: { type: String, default: null },
   },
