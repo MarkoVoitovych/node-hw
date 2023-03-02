@@ -22,8 +22,7 @@ const updateStatusSchema = Joi.object({
   favourite: Joi.bool().messages(generateCustomErrMsg('Favourite')),
 }).min(1);
 
-const contactSchemas = {
+module.exports = {
   addSchema,
   updateStatusSchema,
 };
-module.exports = contactSchemas;

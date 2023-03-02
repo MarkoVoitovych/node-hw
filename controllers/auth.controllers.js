@@ -1,11 +1,16 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const gravatar = require('gravatar');
+const { v4: uuidv4 } = require('uuid');
 
 const { User } = require('../models');
-const { ctrlWrapper, HttpError } = require('../helpers');
+const {
+  ctrlWrapper,
+  HttpError,
+  createTokens,
+  sendEmail,
+} = require('../helpers');
 
-const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, HASH_POWER } = process.env;
+const { HASH_POWER, BASE_URL } = process.env;
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,13 +21,23 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, Number(HASH_POWER));
   const avatarURL = gravatar.url(email);
+  const verificationCode = uuidv4();
 
   const newUser = await User.create({
     name,
     email: email.toLowerCase(),
     password: hashPassword,
     avatarURL,
+    verificationCode,
   });
+
+  const verificationEmail = {
+    to: email,
+    subject: 'Сonfirm your registration',
+    html: `<a href="${BASE_URL}/api/auth/verify/${verificationCode}" target="_blank">Press to confirm your email</a>`,
+  };
+
+  await sendEmail(verificationEmail);
 
   res.status(201).json({
     status: 'success',
@@ -46,25 +61,19 @@ const login = async (req, res) => {
   if (!passwordCompare) {
     throw HttpError(403, 'Email or password is wrong.');
   }
+  if (!user.verify) {
+    throw HttpError(403, 'Verify your email');
+  }
 
-  const payload = {
-    id: user._id,
-  };
-  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
-    expiresIn: '30m',
-  });
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
-    expiresIn: '23h',
-  });
+  const tokens = createTokens(user._id);
 
-  await User.findByIdAndUpdate(user._id, { accessToken, refreshToken });
+  await User.findByIdAndUpdate(user._id, { ...tokens });
 
   res.json({
     status: 'success',
     code: 200,
     data: {
-      accessToken,
-      refreshToken,
+      ...tokens,
       user: {
         id: user._id,
         email,
@@ -76,24 +85,16 @@ const login = async (req, res) => {
 
 const refresh = async (req, res) => {
   const { _id } = req.user;
-  const payload = {
-    id: _id,
-  };
-  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
-    expiresIn: '30m',
-  });
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
-    expiresIn: '23h',
-  });
 
-  await User.findByIdAndUpdate(_id, { accessToken, refreshToken });
+  const tokens = createTokens(_id);
+
+  await User.findByIdAndUpdate(_id, { ...tokens });
 
   res.json({
     status: 'success',
     code: 200,
     data: {
-      accessToken,
-      refreshToken,
+      ...tokens,
       id: _id,
     },
   });

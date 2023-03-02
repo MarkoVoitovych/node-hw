@@ -1,35 +1,37 @@
 const jwt = require('jsonwebtoken');
 
 const { User } = require('../models');
-const { HttpError } = require('../helpers');
+const { HttpError, ctrlWrapper } = require('../helpers');
 
 const { JWT_ACCESS_SECRET } = process.env;
 
 const authentication = async (req, res, next) => {
   const { authorization = '' } = req.headers;
   const [bearer, token] = authorization.split(' ');
-  try {
-    if (bearer !== 'Bearer' || !token) {
-      next(HttpError(400, 'No token provided'));
-      return;
-    }
-    const { id } = jwt.verify(token, JWT_ACCESS_SECRET);
-    const user = await User.findById(id);
+  let payload = '';
 
-    if (!user) {
-      next(HttpError(404, "User doesn't exist"));
-      return;
-    }
-
-    if (!user.accessToken || user.accessToken !== token) {
-      next(HttpError(401, 'Not authorized'));
-      return;
-    }
-    req.user = user;
-    next();
-  } catch (error) {
-    next(HttpError(401, 'Not authorized'));
+  if (bearer !== 'Bearer' || !token) {
+    throw HttpError(400, 'No token provided');
   }
+
+  try {
+    payload = jwt.verify(token, JWT_ACCESS_SECRET);
+  } catch (error) {
+    throw HttpError(400, 'No token provided');
+  }
+
+  const user = await User.findById(payload.id);
+
+  if (!user) {
+    throw HttpError(404, "User doesn't exist");
+  }
+
+  if (!user.accessToken || user.accessToken !== token) {
+    throw HttpError(401, 'Not authorized');
+  }
+
+  req.user = user;
+  next();
 };
 
-module.exports = authentication;
+module.exports = ctrlWrapper(authentication);

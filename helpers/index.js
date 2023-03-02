@@ -4,6 +4,8 @@ const mongooseHandleError = require('./mongooseHandleError');
 const generateCustomErrMsg = require('./generateCustomErrMsg');
 const regExps = require('./regExps');
 const subscriptionsList = require('./subscriptionsList');
+const createTokens = require('./createTokens');
+const sendEmail = require('./sendEmail');
 
 module.exports = {
   HttpError,
@@ -12,4 +14,6 @@ module.exports = {
   generateCustomErrMsg,
   regExps,
   subscriptionsList,
+  createTokens,
+  sendEmail,
 };

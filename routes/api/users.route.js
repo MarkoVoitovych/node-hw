@@ -10,6 +10,14 @@ const {
 
 const router = express.Router();
 
+router.get('/verify/:verificationCode', ctrl.verifyEmail);
+
+router.post(
+  '/resend-verify-email',
+  validateBody(userSchemas.verifyEmailSchema),
+  ctrl.resendVerifyEmail,
+);
+
 router.get('/current', authentication, ctrl.getCurrent);
 
 router.patch(

@@ -23,6 +23,13 @@ const registerSchema = Joi.object({
   avatarURL: Joi.string(),
 });
 
+const verifyEmailSchema = Joi.object({
+  email: Joi.string()
+    .pattern(regExps.emailRegexp)
+    .messages(generateCustomErrMsg('Email'))
+    .required(),
+});
+
 const loginSchema = Joi.object({
   email: Joi.string()
     .pattern(regExps.emailRegexp)
@@ -34,6 +41,10 @@ const loginSchema = Joi.object({
     .required(),
 });
 
+const refreshSchema = Joi.object({
+  refreshToken: Joi.string().required(),
+});
+
 const updateSubscriptionSchema = Joi.object({
   subscription: Joi.string()
     .valid(...subscriptionsList)
@@ -42,6 +53,8 @@ const updateSubscriptionSchema = Joi.object({
 
 module.exports = {
   registerSchema,
+  verifyEmailSchema,
   loginSchema,
   updateSubscriptionSchema,
+  refreshSchema,
 };
