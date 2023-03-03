@@ -1,33 +1,27 @@
 const jwt = require('jsonwebtoken');
 
 const { User } = require('../models');
-const { HttpError } = require('../helpers');
+const { HttpError, ctrlWrapper } = require('../helpers');
 
 const { JWT_REFRESH_SECRET } = process.env;
 
 const refreshToken = async (req, res, next) => {
-  const { authorization = '' } = req.headers;
-  const [bearer, token] = authorization.split(' ');
+  const { refreshToken: token } = req.body;
+  let payload = '';
   try {
-    if (bearer !== 'Bearer' || !token) {
-      next(HttpError(400, 'No token provided'));
-      return;
-    }
-    const { id } = jwt.verify(token, JWT_REFRESH_SECRET);
-    const user = await User.findById(id);
-    if (!user) {
-      next(HttpError(404, "User doesn't exist"));
-      return;
-    }
-    if (!user.refreshToken || user.refreshToken !== token) {
-      next(HttpError(403));
-      return;
-    }
-    req.user = user;
-    next();
+    payload = jwt.verify(token, JWT_REFRESH_SECRET);
   } catch (error) {
-    next(HttpError(403));
+    throw HttpError(400, 'No token provided');
   }
+  const user = await User.findById(payload.id);
+  if (!user) {
+    throw HttpError(404, "User doesn't exist");
+  }
+  if (!user.refreshToken || user.refreshToken !== token) {
+    throw HttpError(403, 'Invalid token');
+  }
+  req.user = user;
+  next();
 };
 
-module.exports = refreshToken;
+module.exports = ctrlWrapper(refreshToken);

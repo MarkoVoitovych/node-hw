@@ -18,7 +18,12 @@ router.post(
 
 router.post('/login', validateBody(userSchemas.loginSchema), ctrl.login);
 
-router.post('/refresh', refreshToken, ctrl.refresh);
+router.post(
+  '/refresh',
+  validateBody(userSchemas.refreshSchema),
+  refreshToken,
+  ctrl.refresh,
+);
 
 router.post('/logout', authentication, ctrl.logout);
 
