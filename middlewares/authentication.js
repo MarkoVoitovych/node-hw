@@ -11,13 +11,13 @@ const authentication = async (req, res, next) => {
   let payload = '';
 
   if (bearer !== 'Bearer' || !token) {
-    throw HttpError(400, 'No token provided');
+    throw HttpError(401, 'No token provided');
   }
 
   try {
     payload = jwt.verify(token, JWT_ACCESS_SECRET);
   } catch (error) {
-    throw HttpError(400, 'No token provided');
+    throw HttpError(401, 'No token provided');
   }
 
   const user = await User.findById(payload.id);

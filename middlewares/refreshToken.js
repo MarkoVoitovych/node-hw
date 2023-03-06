@@ -11,7 +11,7 @@ const refreshToken = async (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_REFRESH_SECRET);
   } catch (error) {
-    throw HttpError(400, 'No token provided');
+    throw HttpError(403, 'No token provided');
   }
   const user = await User.findById(payload.id);
   if (!user) {
